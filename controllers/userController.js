@@ -68,5 +68,37 @@ exports.unfollowUser = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 }
-exports.getFollowers = async (req, res) => res.status(501).json({ message: 'Not Implemented' });
-exports.getFollowing = async (req, res) => res.status(501).json({ message: 'Not Implemented' });
+    exports.getFollowers = async (req, res) => {
+        try {
+            // 1. Get the user ID from
+            const userId = req.params.id;
+            // 2. Check if the user exists
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            // 3. Find all followers of the user
+            const followers = await Follow.find({ followed: userId }).populate('follower', 'username email');
+            // 4. Return the list of followers
+            res.status(200).json({ followers: followers.map(f => f.follower) });
+        } catch (error) {
+            res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        }
+    }
+exports.getFollowing = async (req, res) => {
+    try {
+        // 1. Get the user ID from params
+        const userId = req.params.id;
+        // 2. Check if the user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        // 3. Find all users followed by the user
+        const following = await Follow.find({ follower: userId }).populate('followed', 'username email');
+        // 4. Return the list of followed users
+        res.status(200).json({ following: following.map(f => f.followed) });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+}
