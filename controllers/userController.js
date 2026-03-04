@@ -41,16 +41,32 @@ exports.followUser = async (req, res) => {
         // 5. Create the follow relationship
         const follow = new Follow({ follower: followerId, followed: followedId });
         await follow.save();
-        //6. update the followers and following counts for both users
-        await User.findByIdAndUpdate(followerId, { $inc: { followingCount: 1 } });
-        await User.findByIdAndUpdate(followedId, { $inc: { followersCount: 1 } });
-        //7. Return a success response
+        //6. Return a success response
         res.status(200).json({ message: 'Follow relationship created successfully' });
 
     } catch (error) {
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
     }
 }
-exports.unfollowUser = async (req, res) => res.status(501).json({ message: 'Not Implemented' });
+exports.unfollowUser = async (req, res) => {
+    try {
+        // 1. Get the follower and followed user IDs
+        const followerId = req.user._id; // Assuming user is authenticated and user ID is available in req.user
+        const followedId = req.params.id;
+        // 2. make sure the user not trying to unfollow themselves
+        if (followerId.toString() == followedId.toString()) {
+            return res.status(400).json({ message: 'You cannot unfollow yourself' });
+        }
+        // 3. Check if the follow relationship exists and delete it in one step to decrease the load on the database
+        const unfollowed = await Follow.findOneAndDelete({ follower: followerId, followed: followedId });
+        if (!unfollowed) {
+            return res.status(400).json({ message: 'You are not following this user' });
+        }
+        // 4. Return a success response
+        res.status(200).json({ message: 'Unfollowed successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+}
 exports.getFollowers = async (req, res) => res.status(501).json({ message: 'Not Implemented' });
 exports.getFollowing = async (req, res) => res.status(501).json({ message: 'Not Implemented' });

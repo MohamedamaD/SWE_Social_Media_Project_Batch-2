@@ -30,14 +30,6 @@ const userSchema = new mongoose.Schema(
         enum: ["Active", "Suspended", "Deleted"],
         default: "Active",
         },
-        followersCount: { 
-            type: Number,
-            default: 0 
-        },
-        followingCount: { 
-            type: Number, 
-            default: 0 
-        }
     },
     { timestamps: true },
 );
