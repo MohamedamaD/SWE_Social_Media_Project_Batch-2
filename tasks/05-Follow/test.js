@@ -9,8 +9,13 @@ let token1, id1, id2;
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URI);
-    const u1 = await request(app).post('/api/auth/register').send({ username: 'u1', email: 'u1@e.com', password: 'p' });
-    const u2 = await request(app).post('/api/auth/register').send({ username: 'u2', email: 'u2@e.com', password: 'p' });
+    const u1 = await request(app).post('/api/auth/register').send({ username: 'user1', email: 'u1@e.com', password: 'password123' });
+    const u2 = await request(app).post('/api/auth/register').send({ username: 'user2', email: 'u2@e.com', password: 'password123' });
+    
+    //this is for debugging 
+    console.log("u1 response:", u1.body);
+    console.log("u2 response:", u2.body);
+
     token1 = u1.body.token;
     id1 = u1.body.user._id;
     id2 = u2.body.user._id;
